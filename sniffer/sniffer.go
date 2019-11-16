@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	nic  := "rename4"
+	nic  := "0002:00:02.0"
 	bind := "mlx4_core"
 	port := uint16(0)
 
@@ -28,12 +28,14 @@ func main() {
 
 	device.Bind(bind)
 
+	loadedDriver, _ := device.CurrentDriver()
+	fmt.Printf("Driver: %v\n", loadedDriver)
+
 	mainFlow, err := flow.SetReceiver(port)
 	flow.CheckFatal(err)
 
 	flow.CheckFatal(flow.SetHandler(mainFlow, handler, nil))
-
-	flow.CheckFatal(flow.SetStopper(mainFlow))
+	flow.CheckFatal(flow.SetSender(mainFlow, 0))
 
 	go func() {
 		flow.CheckFatal(flow.SystemStart())
