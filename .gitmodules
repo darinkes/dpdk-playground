@@ -1,0 +1,6 @@
+[submodule "nff-go"]
+	path = nff-go
+	url = https://github.com/darinkes/nff-go.git
+[submodule "libbpf"]
+	path = libbpf
+	url = https://github.com/libbpf/libbpf

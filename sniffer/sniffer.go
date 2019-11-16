@@ -8,6 +8,9 @@ import (
 	"github.com/intel-go/nff-go/devices"
 	"github.com/intel-go/nff-go/flow"
 	"github.com/intel-go/nff-go/packet"
+
+	"github.com/google/gopacket"
+	"github.com/google/gopacket/layers"
 )
 
 func main() {
@@ -15,10 +18,7 @@ func main() {
 	bind := "mlx4_core"
 	port := uint16(0)
 
-	config := flow.Config {
-	}
-
-	flow.CheckFatal(flow.SystemInit(&config))
+	flow.CheckFatal(flow.SystemInit(nil))
 
 	device, err := devices.New(nic)
 	flow.CheckFatal(err)
@@ -26,17 +26,6 @@ func main() {
 	driver, err := device.CurrentDriver()
 	flow.CheckFatal(err)
 
-	defer func() {
-		flow.CheckFatal(flow.SystemStop())
-
-		// Re-Bind to original driver
-		if driver != bind {
-			fmt.Printf("Restoring driver: %s\n", driver)
-			device.Bind(driver)
-		}
-	}()
-
-	// Bind to new user specified driver
 	device.Bind(bind)
 
 	mainFlow, err := flow.SetReceiver(port)
@@ -53,9 +42,18 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
+
+	fmt.Println("Stopping...")
+
 	flow.CheckFatal(flow.SystemStop())
+
+	if driver != bind {
+		fmt.Printf("Restoring driver: %s\n", driver)
+		device.Bind(driver)
+	}
 }
 
 func handler(packet *packet.Packet, context flow.UserContext) {
-	fmt.Printf("Packet: %v", packet)
+	gopacket := gopacket.NewPacket(packet.GetRawPacketBytes(), layers.LayerTypeEthernet, gopacket.Default)
+	fmt.Printf("Packet: %v", gopacket)
 }
