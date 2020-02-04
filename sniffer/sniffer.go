@@ -18,6 +18,7 @@ func main() {
 	flag.Parse()
 
 	config := flow.Config{
+		NoSetSIGINTHandler: true,
 		DPDKArgs: []string {
 			"--vdev=net_vdev_netvsc0,iface=eth1",
 			"--vdev=net_vdev_netvsc1,iface=eth2",
