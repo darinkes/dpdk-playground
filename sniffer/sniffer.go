@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -13,6 +14,9 @@ import (
 )
 
 func main() {
+	portPtr := flag.Int("port", 0, "port number")
+	flag.Parse()
+
 	config := flow.Config{
 		DPDKArgs: []string {
 			"--vdev=net_vdev_netvsc0,iface=eth1",
@@ -21,7 +25,7 @@ func main() {
 	}
 	flow.CheckFatal(flow.SystemInit(&config))
 
-	port := uint16(2)
+	port := uint16(*portPtr)
 	mainFlow, err := flow.SetReceiver(port)
 	flow.CheckFatal(err)
 
